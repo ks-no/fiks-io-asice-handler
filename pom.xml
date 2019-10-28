@@ -40,7 +40,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <revision>1.0.2</revision>
     <logback.version>1.2.3</logback.version>
-    <assertj.version>3.13.2</assertj.version>
+    <assertj.version>3.14.0</assertj.version>
     <mockito.version>3.1.1</mockito.version>
     <kryptering.version>1.0.7</kryptering.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
