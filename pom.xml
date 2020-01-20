@@ -41,7 +41,7 @@
     <revision>1.0.2</revision>
     <logback.version>1.2.3</logback.version>
     <assertj.version>3.13.2</assertj.version>
-    <mockito.version>3.1.1</mockito.version>
+    <mockito.version>3.2.8</mockito.version>
     <kryptering.version>1.0.7</kryptering.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <junit-platform-commons.version>1.5.2</junit-platform-commons.version>
