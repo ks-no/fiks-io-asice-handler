@@ -43,7 +43,7 @@
     <revision>1.0.4</revision>
     <logback.version>1.2.3</logback.version>
     <assertj.version>3.15.0</assertj.version>
-    <mockito.version>3.2.9</mockito.version>
+    <mockito.version>3.3.0</mockito.version>
     <kryptering.version>1.0.7</kryptering.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
   </properties>
