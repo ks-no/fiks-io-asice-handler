@@ -34,7 +34,7 @@
     <lombok.version>1.18.12</lombok.version>
     <changelist>-SNAPSHOT</changelist>
     <assertj.version>3.16.1</assertj.version>
-    <jaxb-runtime.version>2.3.3</jaxb-runtime.version>
+    <jaxb-runtime.version>3.0.0</jaxb-runtime.version>
     <kryptering.version>1.0.10</kryptering.version>
     <mockito.version>3.3.8</mockito.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
