@@ -19,7 +19,7 @@
     <url>https://github.com/ks-no/fiks-io-asice-handler</url>
   </scm>
   <properties>
-    <difi-commons-asic.version>0.9.3</difi-commons-asic.version>
+    <difi-commons-asic.version>0.9.4</difi-commons-asic.version>
     <bouncycastle.version>1.66</bouncycastle.version>
     <lombok.version>1.18.20</lombok.version>
     <assertj.version>3.20.2</assertj.version>
