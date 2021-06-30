@@ -23,7 +23,7 @@
     <bouncycastle.version>1.66</bouncycastle.version>
     <lombok.version>1.18.20</lombok.version>
     <assertj.version>3.20.2</assertj.version>
-    <jaxb-runtime.version>2.3.3</jaxb-runtime.version>
+    <jaxb-runtime.version>3.0.1</jaxb-runtime.version>
     <kryptering.version>1.0.10</kryptering.version>
     <mockito.version>3.11.2</mockito.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
