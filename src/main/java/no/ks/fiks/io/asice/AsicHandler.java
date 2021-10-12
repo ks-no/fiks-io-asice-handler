@@ -11,7 +11,7 @@ import java.util.zip.ZipInputStream;
 /**
  * Handles creation, validation, encryption and decryption of AsicE packages
  */
-public interface AsicHandler {
+public interface AsicHandler extends AutoCloseable {
     static AsicHandlerBuilder builder() {
         return AsicHandlerBuilder.create();
     }
