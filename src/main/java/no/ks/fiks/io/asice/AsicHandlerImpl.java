@@ -61,7 +61,7 @@ class AsicHandlerImpl implements AsicHandler {
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
         encryptedAsicWriter.close();
     }
 
