@@ -91,6 +91,16 @@ public class EncryptedAsicWriterImpl implements EncryptedAsicWriter {
         }
     }
 
+    @Override
+    public void close() {
+        try {
+            inputExecutor.shutdown();
+            inputExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void write(@NonNull final AsicWriter writer, @NonNull final Content p) {
         try {
             writer.add(p.getPayload(), p.getFilnavn());

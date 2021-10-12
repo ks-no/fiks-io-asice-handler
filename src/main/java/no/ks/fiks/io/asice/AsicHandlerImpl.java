@@ -60,5 +60,10 @@ class AsicHandlerImpl implements AsicHandler {
         encryptedAsicReader.writeDecryptedToPath(encryptedAsicData, privatNokkel, targetPath);
     }
 
+    @Override
+    public void close() {
+        encryptedAsicWriter.close();
+    }
+
 
 }

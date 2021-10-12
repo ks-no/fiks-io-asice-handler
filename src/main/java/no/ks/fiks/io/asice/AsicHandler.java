@@ -21,4 +21,6 @@ public interface AsicHandler {
     ZipInputStream decrypt(InputStream encryptedAsicData);
 
     void writeDecrypted(InputStream encryptedAsicData, Path targetPath);
+
+    void close();
 }

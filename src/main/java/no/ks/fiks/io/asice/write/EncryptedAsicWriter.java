@@ -9,4 +9,6 @@ import java.util.List;
 public interface EncryptedAsicWriter {
 
     InputStream createAndEncrypt(X509Certificate x509Certificate, List<Content> contents);
+
+    void close();
 }
