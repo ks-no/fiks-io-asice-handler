@@ -21,6 +21,4 @@ public interface AsicHandler extends AutoCloseable {
     ZipInputStream decrypt(InputStream encryptedAsicData);
 
     void writeDecrypted(InputStream encryptedAsicData, Path targetPath);
-
-    void close();
 }

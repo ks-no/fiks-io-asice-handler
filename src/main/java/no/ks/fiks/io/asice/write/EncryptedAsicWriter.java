@@ -9,6 +9,4 @@ import java.util.List;
 public interface EncryptedAsicWriter extends AutoCloseable {
 
     InputStream createAndEncrypt(X509Certificate x509Certificate, List<Content> contents);
-
-    void close();
 }
