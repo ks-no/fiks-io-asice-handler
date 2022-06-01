@@ -22,7 +22,7 @@
     <difi-commons-asic.version>0.10.0</difi-commons-asic.version>
     <bouncycastle.version>1.69</bouncycastle.version>
     <lombok.version>1.18.22</lombok.version>
-    <assertj.version>3.21.0</assertj.version>
+    <assertj.version>3.23.1</assertj.version>
     <jaxb-runtime.version>2.3.4</jaxb-runtime.version>
     <kryptering.version>1.1.1</kryptering.version>
     <mockito.version>3.11.2</mockito.version>
