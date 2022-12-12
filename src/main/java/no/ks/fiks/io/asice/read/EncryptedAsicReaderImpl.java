@@ -43,12 +43,11 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
         checkNotNull(encryptedAsicData);
         checkNotNull(privateKey);
         try {
-
             PipedOutputStream out = new PipedOutputStream();
             PipedInputStream pipedInputStream = new PipedInputStream(out);
             final Map<String, String> mdc = MDC.getCopyOfContextMap();
             executorService.execute(() -> {
-                Optional.ofNullable(mdc).ifPresent(m -> MDC.setContextMap(m));
+                Optional.ofNullable(mdc).ifPresent(MDC::setContextMap);
                 try (ZipOutputStream zipOutputStream = new ZipOutputStream(out)) {
                     decrypt(encryptedAsicData, zipOutputStream, privateKey);
                 } catch (IOException e) {
@@ -90,17 +89,15 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
 
         try {
             reader = asicReaderFactory.open(inputStream);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        boolean entryAdded = false;
-        try {
+
+            boolean entryAdded = false;
             String filnavn;
             while ((filnavn = reader.getNextFile()) != null) {
                 entryAdded = true;
                 zipOutputStream.putNextEntry(new ZipEntry(filnavn));
                 reader.writeFile(zipOutputStream);
                 zipOutputStream.closeEntry();
+                zipOutputStream.flush();
             }
 
             if (!entryAdded)
@@ -109,11 +106,6 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
             throw new RuntimeException(e);
         } finally {
             closeQuietly(encryptedAsic);
-            try {
-                zipOutputStream.close();
-            } catch (IOException e) {
-                log.info("Failed to close stream", e);
-            }
         }
     }
 
