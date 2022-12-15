@@ -97,7 +97,6 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
                 zipOutputStream.putNextEntry(new ZipEntry(filnavn));
                 reader.writeFile(zipOutputStream);
                 zipOutputStream.closeEntry();
-                zipOutputStream.flush();
             }
 
             if (!entryAdded)
@@ -119,5 +118,4 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
         InputStream inputStream = decryptionStreamService.decrypterStream(encryptedAsic, privatNokkel);
         decryptElementer(encryptedAsic, zipOutputStream, inputStream);
     }
-
 }
