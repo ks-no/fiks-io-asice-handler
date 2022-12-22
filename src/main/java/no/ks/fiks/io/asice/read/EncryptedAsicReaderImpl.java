@@ -48,7 +48,7 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
             final Map<String, String> mdc = MDC.getCopyOfContextMap();
             executorService.execute(() -> {
                 Optional.ofNullable(mdc).ifPresent(MDC::setContextMap);
-                try (ZipOutputStream zipOutputStream = new ZipOutputStream(out)) {
+                try (ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(out))) {
                     decrypt(encryptedAsicData, zipOutputStream, privateKey);
                 } catch (IOException e) {
                     log.error("Failed to decrypt stream", e);
@@ -97,7 +97,6 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
                 zipOutputStream.putNextEntry(new ZipEntry(filnavn));
                 reader.writeFile(zipOutputStream);
                 zipOutputStream.closeEntry();
-                zipOutputStream.flush();
             }
 
             if (!entryAdded)
@@ -119,5 +118,4 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
         InputStream inputStream = decryptionStreamService.decrypterStream(encryptedAsic, privatNokkel);
         decryptElementer(encryptedAsic, zipOutputStream, inputStream);
     }
-
 }
