@@ -71,7 +71,7 @@ class AsicHandlerTest {
                         throw new RuntimeException(e);
                     }
 
-                    //den krypterte filen skal nødvendigvis være lengre enn plaintext
+                    //den krypterte filen skal nidvendigvis være lengre enn plaintext
                     assertTrue(encrypted.length > plaintext.length);
 
                     //verifiser at plaintext payloaden ikke finnes i den krypterte filen
@@ -119,7 +119,7 @@ class AsicHandlerTest {
                         throw new RuntimeException(e);
                     }
 
-                    //den krypterte filen skal nødvendigvis være lengre enn plaintext
+                    //den krypterte filen skal nidvendigvis være lengre enn plaintext
                     assertTrue(encrypted.length > plaintext.length);
 
                     //verifiser at plaintext payloaden ikke finnes i den krypterte filen
@@ -156,7 +156,7 @@ class AsicHandlerTest {
             log.info("done reading");
             encrypt.close();
 
-            //den krypterte filen skal nødvendigvis være lengre enn plaintext
+            //den krypterte filen skal nidvendigvis være lengre enn plaintext
             assertTrue(encrypted.length > plaintext.length);
 
             //verifiser at plaintext payloaden ikke finnes i den krypterte filen
@@ -167,7 +167,7 @@ class AsicHandlerTest {
     }
 
     @Test
-    @DisplayName("Verifiser at payload blir kryptert også uten privat nøkkel")
+    @DisplayName("Verifiser at payload blir kryptert også uten privat nikkel")
     void testKrypterStreamUtenPrivatNokkel() throws Exception {
 
         final ExecutorService executor = Executors.newFixedThreadPool(2);
@@ -187,7 +187,7 @@ class AsicHandlerTest {
             log.info("done reading");
             encrypt.close();
 
-            //den krypterte filen skal nødvendigvis være lengre enn plaintext
+            //den krypterte filen skal nidvendigvis være lengre enn plaintext
             assertTrue(encrypted.length > plaintext.length);
 
             //verifiser at plaintext payloaden ikke finnes i den krypterte filen
@@ -219,6 +219,111 @@ class AsicHandlerTest {
     }
 
     @Test
+    @DisplayName("Test at en eller flere feile private keys kaster kryptering-feil og returnerer null")
+    void testDekrypterStreamFeilPrivateKey() throws Exception {
+
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        final AsicHandler asicHandler = AsicHandler.builder()
+            .withPrivatNokkel(getPrivateKeyResource("/alice.key"))
+            .withKeyStoreHolder(getKeystoreHolder())
+            .withExecutorService(executor)
+            .build();
+
+        List<PrivateKey> privateKeys = new ArrayList<>();
+        privateKeys.add(getPrivateKeyResource("/alice.key"));
+        privateKeys.add(getPrivateKeyResource("/alice.key"));
+        privateKeys.add(getPrivateKeyResource("/alice.key"));
+        privateKeys.add(getPrivateKeyResource("/alice.key"));
+
+        final AsicHandler asicHandlerList = AsicHandler.builder()
+            .withPrivateNokkeler(privateKeys)
+            .withKeyStoreHolder(getKeystoreHolder())
+            .withExecutorService(executor)
+            .build();
+
+        byte[] payload = UUID.randomUUID().toString().getBytes(StandardCharsets.UTF_8);
+        InputStream encrypted = asicHandler.encrypt(getPublicCertResource("bob.cert"), singletonList(new StreamContent(new ByteArrayInputStream(payload), "payload.txt")));
+        ZipInputStream decrypt = asicHandler.decrypt(new ByteArrayInputStream(IOUtils.toByteArray(encrypted)));
+        ZipInputStream decryptWithList = asicHandlerList.decrypt(new ByteArrayInputStream(IOUtils.toByteArray(encrypted)));
+
+        assertArrayEquals(null, readBytes(decrypt).get("payload.txt"));
+        assertArrayEquals(null, readBytes(decryptWithList).get("payload.txt"));
+        decrypt.close();
+        decryptWithList.close();
+        encrypted.close();
+        executor.shutdownNow();
+    }
+
+    @Test
+    @DisplayName("Test at en feil og en riktig private key blir riktig")
+    void testDekrypterStreamToPrivateKey() throws Exception {
+
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        List<PrivateKey> privateKeysAliceFirst = new ArrayList<>();
+        List<PrivateKey> privateKeysBobFirst = new ArrayList<>();
+        List<PrivateKey> privateKeysBobIMidtenAvMangeAlice = new ArrayList<>();
+        privateKeysAliceFirst.add(getPrivateKeyResource("/alice.key"));
+        privateKeysAliceFirst.add(getPrivateKeyResource("/bob.key"));
+
+        privateKeysBobFirst.add(getPrivateKeyResource("/bob.key"));
+        privateKeysBobFirst.add(getPrivateKeyResource("/alice.key"));
+
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/bob.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+
+        final AsicHandler asicHandlerAliceFirst = AsicHandler.builder()
+            .withPrivateNokkeler(privateKeysAliceFirst)
+            .withKeyStoreHolder(getKeystoreHolder())
+            .withExecutorService(executor)
+            .build();
+
+        final AsicHandler asicHandlerBobFirst = AsicHandler.builder()
+            .withPrivateNokkeler(privateKeysBobFirst)
+            .withKeyStoreHolder(getKeystoreHolder())
+            .withExecutorService(executor)
+            .build();
+
+        final AsicHandler asicHandlerBobInMiddleOfAlices = AsicHandler.builder()
+            .withPrivateNokkeler(privateKeysBobFirst)
+            .withKeyStoreHolder(getKeystoreHolder())
+            .withExecutorService(executor)
+            .build();
+
+        byte[] payload = UUID.randomUUID().toString().getBytes(StandardCharsets.UTF_8);
+        InputStream encrypted = asicHandlerAliceFirst.encrypt(getPublicCertResource("bob.cert"), singletonList(new StreamContent(new ByteArrayInputStream(payload), "payload.txt")));
+        ZipInputStream decryptAliceFirst = asicHandlerAliceFirst.decrypt(new ByteArrayInputStream(IOUtils.toByteArray(encrypted)));
+        ZipInputStream decryptBobFirst = asicHandlerBobFirst.decrypt(new ByteArrayInputStream(IOUtils.toByteArray(encrypted)));
+        ZipInputStream decryptBobInMiddleOfAlices = asicHandlerBobInMiddleOfAlices.decrypt(new ByteArrayInputStream(IOUtils.toByteArray(encrypted)));
+
+        assertArrayEquals(null, readBytes(decryptAliceFirst).get("payload.txt"));
+        assertArrayEquals(null, readBytes(decryptBobFirst).get("payload.txt"));
+        assertArrayEquals(null, readBytes(decryptBobInMiddleOfAlices).get("payload.txt"));
+        decryptAliceFirst.close();
+        decryptBobFirst.close();
+        decryptBobInMiddleOfAlices.close();
+        encrypted.close();
+        executor.shutdownNow();
+    }
+
+    @Test
     @DisplayName("Test at vi kan dekryptere en payload til en fil")
     void testDekrypterFil(@TempDir Path tempDir) throws Exception {
 
@@ -240,7 +345,7 @@ class AsicHandlerTest {
         executor.shutdownNow();
     }
 
-    @DisplayName("Kan ikke dekryptere uten at privat nøkkel er oppgitt")
+    @DisplayName("Kan ikke dekryptere uten at privat nikkel er oppgitt")
     @Test
     void testDekrypterPrivatNokkelMangler() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
         final ExecutorService executor = Executors.newSingleThreadExecutor();

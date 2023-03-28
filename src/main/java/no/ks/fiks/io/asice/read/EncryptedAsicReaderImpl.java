@@ -7,6 +7,7 @@ import no.difi.asic.AsicReaderFactory;
 import no.difi.asic.SignatureMethod;
 import no.ks.fiks.io.asice.crypto.DecryptionStreamService;
 import no.ks.kryptering.CMSKrypteringImpl;
+import no.ks.kryptering.KrypteringException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -15,6 +16,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.PrivateKey;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -39,9 +41,9 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
     }
 
     @Override
-    public ZipInputStream decrypt(final InputStream encryptedAsicData, final PrivateKey privateKey) {
+    public ZipInputStream decrypt(final InputStream encryptedAsicData, final List<PrivateKey> privateKeys) {
         checkNotNull(encryptedAsicData);
-        checkNotNull(privateKey);
+        checkNotNull(privateKeys);
         try {
             PipedOutputStream out = new PipedOutputStream();
             PipedInputStream pipedInputStream = new PipedInputStream(out);
@@ -49,7 +51,7 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
             executorService.execute(() -> {
                 Optional.ofNullable(mdc).ifPresent(MDC::setContextMap);
                 try (ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(out))) {
-                    decrypt(encryptedAsicData, zipOutputStream, privateKey);
+                    decrypt(encryptedAsicData, zipOutputStream, privateKeys);
                 } catch (IOException e) {
                     log.error("Failed to decrypt stream", e);
                     throw new RuntimeException(e);
@@ -65,23 +67,32 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
     }
 
     @Override
-    public void writeDecryptedToPath(InputStream encryptedAsicData, PrivateKey privateKey, Path targetPath) {
+    public void writeDecryptedToPath(InputStream encryptedAsicData, List<PrivateKey> privateKeys, Path targetPath) {
         Preconditions.checkNotNull(encryptedAsicData);
-        Preconditions.checkNotNull(privateKey);
+        Preconditions.checkNotNull(privateKeys);
         Preconditions.checkNotNull(targetPath);
         try (OutputStream fileStream = Files.newOutputStream(targetPath);
              ZipOutputStream zipOutputStream = new ZipOutputStream(fileStream)) {
-            decrypt(encryptedAsicData, privateKey, zipOutputStream);
+            decrypt(encryptedAsicData, privateKeys, zipOutputStream);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void decrypt(final InputStream encryptedAsic, final PrivateKey privateKey, final ZipOutputStream zipOutputStream) {
+    private void decrypt(final InputStream encryptedAsic, final List<PrivateKey> privateKeys, final ZipOutputStream zipOutputStream) {
         CMSKrypteringImpl cmsKryptering = new CMSKrypteringImpl();
-
-        InputStream inputStream = cmsKryptering.dekrypterData(encryptedAsic, privateKey);
-        decryptElementer(encryptedAsic, zipOutputStream, inputStream);
+        for (int i = 0; i < privateKeys.size(); i++) {
+            try {
+                InputStream inputStream = cmsKryptering.dekrypterData(encryptedAsic, privateKeys.get(i));
+                decryptElementer(encryptedAsic, zipOutputStream, inputStream);
+            }catch (KrypteringException krypteringException){
+                if(i == privateKeys.size()-1){
+                    throw krypteringException;
+                } else{
+                    log.info("Prøvde å dekryptere ");
+                }
+            }
+        }
     }
 
     private void decryptElementer(InputStream encryptedAsic, ZipOutputStream zipOutputStream, InputStream inputStream) {
@@ -110,12 +121,12 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
 
     private void decrypt(@NonNull final InputStream encryptedAsic,
                          @NonNull final ZipOutputStream zipOutputStream,
-                         @NonNull final PrivateKey privatNokkel) {
+                         @NonNull final List<PrivateKey> privateNokkeler) {
 
         checkNotNull(encryptedAsic);
         checkNotNull(zipOutputStream);
-        checkNotNull(privatNokkel);
-        InputStream inputStream = decryptionStreamService.decrypterStream(encryptedAsic, privatNokkel);
+        checkNotNull(privateNokkeler);
+        InputStream inputStream = decryptionStreamService.decrypterStream(encryptedAsic, privateNokkeler);
         decryptElementer(encryptedAsic, zipOutputStream, inputStream);
     }
 }

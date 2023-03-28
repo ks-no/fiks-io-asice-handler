@@ -18,14 +18,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class AsicHandlerImpl implements AsicHandler {
     static final String ERROR_MISSING_PRIVATE_KEY = "Privatnøkkel er ikke definert. Kan ikke dekryptere";
-    private final PrivateKey privatNokkel;
+    private final List<PrivateKey> privateNokkeler;
     private final EncryptedAsicWriter encryptedAsicWriter;
     private final EncryptedAsicReader encryptedAsicReader;
 
-    AsicHandlerImpl(final PrivateKey privatNokkel,
+    AsicHandlerImpl(final List<PrivateKey> privateNokkeler,
                     final EncryptedAsicWriter encryptedAsicWriter,
                     final EncryptedAsicReader encryptedAsicReader) {
-        this.privatNokkel = privatNokkel;
+        this.privateNokkeler = privateNokkeler;
 
         checkNotNull(encryptedAsicWriter);
         this.encryptedAsicWriter = encryptedAsicWriter;
@@ -43,21 +43,21 @@ class AsicHandlerImpl implements AsicHandler {
 
     @Override
     public ZipInputStream decrypt(final InputStream encryptedAsicData) {
-        if(null == privatNokkel) {
+        if(null == privateNokkeler) {
             throw new IllegalStateException(ERROR_MISSING_PRIVATE_KEY);
         }
         checkNotNull(encryptedAsicData);
-        return encryptedAsicReader.decrypt(encryptedAsicData, privatNokkel);
+        return encryptedAsicReader.decrypt(encryptedAsicData, privateNokkeler);
     }
 
     @Override
     public void writeDecrypted(final InputStream encryptedAsicData, final Path targetPath) {
-        if(null == privatNokkel) {
+        if(null == privateNokkeler) {
             throw new IllegalStateException(ERROR_MISSING_PRIVATE_KEY);
         }
         checkNotNull(encryptedAsicData);
         checkNotNull(targetPath);
-        encryptedAsicReader.writeDecryptedToPath(encryptedAsicData, privatNokkel, targetPath);
+        encryptedAsicReader.writeDecryptedToPath(encryptedAsicData, privateNokkeler, targetPath);
     }
 
     @Override
