@@ -20,7 +20,7 @@
   </scm>
   <properties>
     <difi-commons-asic.version>1.0.0</difi-commons-asic.version>
-    <bouncycastle.version>1.72</bouncycastle.version>
+    <bouncycastle.version>1.73</bouncycastle.version>
     <lombok.version>1.18.26</lombok.version>
     <assertj.version>3.24.2</assertj.version>
     <jaxb-runtime.version>4.0.1</jaxb-runtime.version>
