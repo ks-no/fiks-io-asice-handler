@@ -80,13 +80,8 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
     }
 
     private void decrypt(final InputStream encryptedAsic, final List<PrivateKey> privateKeys, final ZipOutputStream zipOutputStream) {
-        if(!encryptedAsic.markSupported()) {
-            InputStream inputStream = cmsKrypteringHandler.handleEncryptedStream(new BufferedInputStream(encryptedAsic), privateKeys);
-            decryptElementer(encryptedAsic, zipOutputStream, inputStream);
-        } else {
-            InputStream inputStream = cmsKrypteringHandler.handleEncryptedStream(encryptedAsic, privateKeys);
-            decryptElementer(encryptedAsic, zipOutputStream, inputStream);
-        }
+        InputStream inputStream = cmsKrypteringHandler.handleEncryptedStream(encryptedAsic, privateKeys);
+        decryptElementer(encryptedAsic, zipOutputStream, inputStream);
     }
 
 

@@ -1,11 +1,11 @@
 package no.ks.fiks.io.asice.util;
 
-import no.ks.fiks.io.asice.read.EncryptedAsicReaderImpl;
 import no.ks.kryptering.CMSKrypteringImpl;
 import no.ks.kryptering.KrypteringException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.PrivateKey;
@@ -17,6 +17,9 @@ public class CMSKrypteringHandler {
 
 
     public InputStream handleEncryptedStream(InputStream inputStream, List<PrivateKey> privateKeys){
+        if(!inputStream.markSupported() && privateKeys.size() > 1){
+            inputStream = new BufferedInputStream(inputStream);
+        }
         InputStream res = null;
         int it = 0;
         inputStream.mark(0);
