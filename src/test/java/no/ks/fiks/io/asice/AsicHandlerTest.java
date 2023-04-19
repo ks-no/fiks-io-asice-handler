@@ -72,7 +72,7 @@ class AsicHandlerTest {
                         throw new RuntimeException(e);
                     }
 
-                    //den krypterte filen skal nidvendigvis være lengre enn plaintext
+                    //den krypterte filen skal nødvendigvis være lengre enn plaintext
                     assertTrue(encrypted.length > plaintext.length);
 
                     //verifiser at plaintext payloaden ikke finnes i den krypterte filen
@@ -120,7 +120,7 @@ class AsicHandlerTest {
                         throw new RuntimeException(e);
                     }
 
-                    //den krypterte filen skal nidvendigvis være lengre enn plaintext
+                    //den krypterte filen skal nødvendigvis være lengre enn plaintext
                     assertTrue(encrypted.length > plaintext.length);
 
                     //verifiser at plaintext payloaden ikke finnes i den krypterte filen
@@ -157,7 +157,7 @@ class AsicHandlerTest {
             log.info("done reading");
             encrypt.close();
 
-            //den krypterte filen skal nidvendigvis være lengre enn plaintext
+            //den krypterte filen skal nødvendigvis være lengre enn plaintext
             assertTrue(encrypted.length > plaintext.length);
 
             //verifiser at plaintext payloaden ikke finnes i den krypterte filen
@@ -188,7 +188,7 @@ class AsicHandlerTest {
             log.info("done reading");
             encrypt.close();
 
-            //den krypterte filen skal nidvendigvis være lengre enn plaintext
+            //den krypterte filen skal nødvendigvis være lengre enn plaintext
             assertTrue(encrypted.length > plaintext.length);
 
             //verifiser at plaintext payloaden ikke finnes i den krypterte filen
@@ -328,7 +328,7 @@ class AsicHandlerTest {
 
     @Test
     @DisplayName("Test at en eller flere feil og en riktig private key blir riktig")
-    void testDekrypterStreamToPrivateKey() throws Exception {
+    void testDekrypterStreamFlerePrivateKey() throws Exception {
 
         final ExecutorService executor = Executors.newFixedThreadPool(2);
 

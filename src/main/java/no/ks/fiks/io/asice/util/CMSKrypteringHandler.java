@@ -19,6 +19,9 @@ public class CMSKrypteringHandler {
             try {
                 res = decrypterStreamForKey(inputStream, privateKeys.get(it));
             } catch (KrypteringException krypteringException){
+                if(it == privateKeys.size()-1){
+                    throw krypteringException;
+                }
                 try {
                     inputStream.reset();
                 } catch (IOException e) {
