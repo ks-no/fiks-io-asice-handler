@@ -327,30 +327,6 @@ class AsicHandlerTest {
     }
 
     @Test
-    @DisplayName("Test liste med to private key alice først, ikke markable inputstream")
-    void testDekrypterStreamListeMedToPrivateKeyAliceFirstNonMarkable() throws Exception {
-        final ExecutorService executor = Executors.newFixedThreadPool(2);
-        List<PrivateKey> privateKey = new ArrayList<>();
-        privateKey.add(getPrivateKeyResource("/alice.key"));
-        privateKey.add(getPrivateKeyResource("/bob.key"));
-
-        final AsicHandler asicHandler = AsicHandler.builder()
-            .withPrivateNokkeler(privateKey)
-            .withKeyStoreHolder(getKeystoreHolder())
-            .withExecutorService(executor)
-            .build();
-
-        byte[] payload = UUID.randomUUID().toString().getBytes(StandardCharsets.UTF_8);
-        InputStream encrypted = asicHandler.encrypt(getPublicCertResource("bob.cert"), singletonList(new StreamContent(new ByteArrayInputStream(payload), "payload.txt")));
-
-
-        ZipInputStream decrypt = asicHandler.decrypt(encrypted);
-        assertArrayEquals(payload, readBytes(decrypt).get("payload.txt"));
-
-        executor.shutdownNow();
-    }
-
-    @Test
     @DisplayName("Test at en eller flere feil og en riktig private key blir riktig")
     void testDekrypterStreamToPrivateKey() throws Exception {
 

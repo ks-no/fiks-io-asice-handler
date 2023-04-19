@@ -6,8 +6,7 @@ import no.difi.asic.AsicReader;
 import no.difi.asic.AsicReaderFactory;
 import no.difi.asic.SignatureMethod;
 import no.ks.fiks.io.asice.crypto.DecryptionStreamService;
-import no.ks.kryptering.CMSKrypteringImpl;
-import no.ks.kryptering.KrypteringException;
+import no.ks.fiks.io.asice.util.CMSKrypteringHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -31,7 +30,7 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
     private static final Logger log = LoggerFactory.getLogger(EncryptedAsicReaderImpl.class);
     private final ExecutorService executorService;
     private final DecryptionStreamService decryptionStreamService;
-    private final CMSKrypteringImpl cmsKryptering = new CMSKrypteringImpl();
+    private final CMSKrypteringHandler cmsKrypteringHandler = new CMSKrypteringHandler();
     private final AsicReaderFactory asicReaderFactory = AsicReaderFactory.newFactory(SignatureMethod.CAdES);
 
     public EncryptedAsicReaderImpl(final ExecutorService executorService, final DecryptionStreamService decryptionStreamService) {
@@ -81,35 +80,15 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
     }
 
     private void decrypt(final InputStream encryptedAsic, final List<PrivateKey> privateKeys, final ZipOutputStream zipOutputStream) {
-        InputStream inputStream = handleEncryptedStream(encryptedAsic, privateKeys);
-        decryptElementer(encryptedAsic, zipOutputStream, inputStream);
+        if(!encryptedAsic.markSupported()) {
+            InputStream inputStream = cmsKrypteringHandler.handleEncryptedStream(new BufferedInputStream(encryptedAsic), privateKeys);
+            decryptElementer(encryptedAsic, zipOutputStream, inputStream);
+        } else {
+            InputStream inputStream = cmsKrypteringHandler.handleEncryptedStream(encryptedAsic, privateKeys);
+            decryptElementer(encryptedAsic, zipOutputStream, inputStream);
+        }
     }
 
-    private InputStream handleEncryptedStream(InputStream inputStream, List<PrivateKey> privateKeys){
-        InputStream res = null;
-        int it = 0;
-        if(!inputStream.markSupported()){
-            inputStream = new BufferedInputStream(inputStream);
-        }
-        inputStream.mark(0);
-        while(res == null && it < privateKeys.size()){
-            try {
-                res = decrypterStreamForKey(inputStream, privateKeys.get(it));
-            } catch (KrypteringException krypteringException){
-                try {
-                    inputStream.reset();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                it++;
-            }
-        }
-        return res;
-    }
-
-    private InputStream decrypterStreamForKey(InputStream inputStream, PrivateKey privateKey) {
-        return cmsKryptering.dekrypterData(inputStream, privateKey);
-    }
 
     private void decryptElementer(InputStream encryptedAsic, ZipOutputStream zipOutputStream, InputStream inputStream) {
         AsicReader reader;
