@@ -220,7 +220,7 @@ class AsicHandlerTest {
     }
 
     @Test
-    @DisplayName("Test at en eller flere feile private keys kaster kryptering-feil og returnerer null")
+    @DisplayName("Test at en eller flere ugyldige private keys kaster kryptering-feil og returnerer null")
     void testDekrypterStreamFeilPrivateKey() throws Exception {
 
         final ExecutorService executor = Executors.newFixedThreadPool(2);
