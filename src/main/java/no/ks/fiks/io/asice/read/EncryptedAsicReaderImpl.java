@@ -31,6 +31,7 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
     private static final Logger log = LoggerFactory.getLogger(EncryptedAsicReaderImpl.class);
     private final ExecutorService executorService;
     private final DecryptionStreamService decryptionStreamService;
+    private final CMSKrypteringImpl cmsKryptering = new CMSKrypteringImpl();
     private final AsicReaderFactory asicReaderFactory = AsicReaderFactory.newFactory(SignatureMethod.CAdES);
 
     public EncryptedAsicReaderImpl(final ExecutorService executorService, final DecryptionStreamService decryptionStreamService) {
@@ -80,19 +81,34 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
     }
 
     private void decrypt(final InputStream encryptedAsic, final List<PrivateKey> privateKeys, final ZipOutputStream zipOutputStream) {
-        CMSKrypteringImpl cmsKryptering = new CMSKrypteringImpl();
-        for (int i = 0; i < privateKeys.size(); i++) {
+        InputStream inputStream = handleEncryptedStream(encryptedAsic, privateKeys);
+        decryptElementer(encryptedAsic, zipOutputStream, inputStream);
+    }
+
+    private InputStream handleEncryptedStream(InputStream inputStream, List<PrivateKey> privateKeys){
+        InputStream res = null;
+        int it = 0;
+        if(!inputStream.markSupported()){
+            inputStream = new BufferedInputStream(inputStream);
+        }
+        inputStream.mark(0);
+        while(res == null && it < privateKeys.size()){
             try {
-                InputStream inputStream = cmsKryptering.dekrypterData(encryptedAsic, privateKeys.get(i));
-                decryptElementer(encryptedAsic, zipOutputStream, inputStream);
-            }catch (KrypteringException krypteringException){
-                if(i == privateKeys.size()-1){
-                    throw krypteringException;
-                } else{
-                    log.info("Prøvde å dekryptere ");
+                res = decrypterStreamForKey(inputStream, privateKeys.get(it));
+            } catch (KrypteringException krypteringException){
+                try {
+                    inputStream.reset();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
+                it++;
             }
         }
+        return res;
+    }
+
+    private InputStream decrypterStreamForKey(InputStream inputStream, PrivateKey privateKey) {
+        return cmsKryptering.dekrypterData(inputStream, privateKey);
     }
 
     private void decryptElementer(InputStream encryptedAsic, ZipOutputStream zipOutputStream, InputStream inputStream) {

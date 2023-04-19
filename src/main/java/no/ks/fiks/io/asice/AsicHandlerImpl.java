@@ -43,7 +43,7 @@ class AsicHandlerImpl implements AsicHandler {
 
     @Override
     public ZipInputStream decrypt(final InputStream encryptedAsicData) {
-        if(null == privateNokkeler) {
+        if(null == privateNokkeler || privateNokkeler.isEmpty()) {
             throw new IllegalStateException(ERROR_MISSING_PRIVATE_KEY);
         }
         checkNotNull(encryptedAsicData);
@@ -52,7 +52,7 @@ class AsicHandlerImpl implements AsicHandler {
 
     @Override
     public void writeDecrypted(final InputStream encryptedAsicData, final Path targetPath) {
-        if(null == privateNokkeler) {
+        if(null == privateNokkeler || privateNokkeler.isEmpty()) {
             throw new IllegalStateException(ERROR_MISSING_PRIVATE_KEY);
         }
         checkNotNull(encryptedAsicData);

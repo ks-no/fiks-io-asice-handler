@@ -6,6 +6,8 @@ import no.ks.kryptering.KrypteringException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.PrivateKey;
 import java.util.List;
@@ -17,15 +19,37 @@ public class DecryptionStreamServiceImpl implements DecryptionStreamService {
 
     @Override
     public InputStream decrypterStream(@NonNull InputStream encryptedStream, @NonNull List<PrivateKey> privateKeys) {
-        for (int i = 0; i < privateKeys.size(); i++) {
+        if(!encryptedStream.markSupported()){
+            return handleEncryptedStream(new BufferedInputStream(encryptedStream), privateKeys);
+        }
+        else{
+            return handleEncryptedStream(encryptedStream,privateKeys);
+        }
+    }
+
+    private InputStream handleEncryptedStream(InputStream inputStream, List<PrivateKey> privateKeys){
+        InputStream res = null;
+        int it = 0;
+        inputStream.mark(0);
+        if(!inputStream.markSupported()){
+            inputStream = new BufferedInputStream(inputStream);
+        }
+        while(res == null && it < privateKeys.size()){
             try {
-                return cmsKryptering.dekrypterData(encryptedStream, privateKeys.get(i));
-            } catch (KrypteringException krypteringException) {
-                if (i == privateKeys.size() - 1)
-                    throw krypteringException;
-                else log.info("HHH");
+                res = decrypterStreamForKey(inputStream, privateKeys.get(it));
+            } catch (KrypteringException krypteringException){
+                try {
+                    inputStream.reset();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                it++;
             }
         }
-        return null;
+        return res;
+    }
+
+    private InputStream decrypterStreamForKey(InputStream inputStream, PrivateKey privateKey) {
+        return cmsKryptering.dekrypterData(inputStream, privateKey);
     }
 }
