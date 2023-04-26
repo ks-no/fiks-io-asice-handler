@@ -33,7 +33,7 @@ public final class AsicHandlerBuilder {
         this.privateKeys = Collections.singletonList(privateKey);
         return this;
     }
-    public AsicHandlerBuilder withPrivateNokkeler(List<PrivateKey> privateKeys) {
+    public AsicHandlerBuilder withPrivateNokler(List<PrivateKey> privateKeys) {
         this.privateKeys = privateKeys;
         return this;
     }

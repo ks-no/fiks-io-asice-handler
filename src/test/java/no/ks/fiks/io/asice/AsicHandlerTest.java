@@ -238,7 +238,7 @@ class AsicHandlerTest {
         privateKeys.add(getPrivateKeyResource("/alice.key"));
 
         final AsicHandler asicHandlerList = AsicHandler.builder()
-            .withPrivateNokkeler(privateKeys)
+            .withPrivateNokler(privateKeys)
             .withKeyStoreHolder(getKeystoreHolder())
             .withExecutorService(executor)
             .build();
@@ -265,7 +265,7 @@ class AsicHandlerTest {
         privateKey.add(getPrivateKeyResource("/bob.key"));
 
         final AsicHandler asicHandler = AsicHandler.builder()
-            .withPrivateNokkeler(privateKey)
+            .withPrivateNokler(privateKey)
             .withKeyStoreHolder(getKeystoreHolder())
             .withExecutorService(executor)
             .build();
@@ -288,7 +288,7 @@ class AsicHandlerTest {
         privateKey.add(getPrivateKeyResource("/alice.key"));
 
         final AsicHandler asicHandler = AsicHandler.builder()
-            .withPrivateNokkeler(privateKey)
+            .withPrivateNokler(privateKey)
             .withKeyStoreHolder(getKeystoreHolder())
             .withExecutorService(executor)
             .build();
@@ -311,7 +311,7 @@ class AsicHandlerTest {
         privateKey.add(getPrivateKeyResource("/bob.key"));
 
         final AsicHandler asicHandler = AsicHandler.builder()
-            .withPrivateNokkeler(privateKey)
+            .withPrivateNokler(privateKey)
             .withKeyStoreHolder(getKeystoreHolder())
             .withExecutorService(executor)
             .build();
@@ -361,19 +361,19 @@ class AsicHandlerTest {
         privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
 
         final AsicHandler asicHandlerAliceFirst = AsicHandler.builder()
-            .withPrivateNokkeler(privateKeysAliceFirst)
+            .withPrivateNokler(privateKeysAliceFirst)
             .withKeyStoreHolder(getKeystoreHolder())
             .withExecutorService(executor)
             .build();
 
         final AsicHandler asicHandlerBobFirst = AsicHandler.builder()
-            .withPrivateNokkeler(privateKeysBobFirst)
+            .withPrivateNokler(privateKeysBobFirst)
             .withKeyStoreHolder(getKeystoreHolder())
             .withExecutorService(executor)
             .build();
 
         final AsicHandler asicHandlerBobInMiddleOfAlices = AsicHandler.builder()
-            .withPrivateNokkeler(privateKeysBobIMidtenAvMangeAlice)
+            .withPrivateNokler(privateKeysBobIMidtenAvMangeAlice)
             .withKeyStoreHolder(getKeystoreHolder())
             .withExecutorService(executor)
             .build();
@@ -430,7 +430,7 @@ class AsicHandlerTest {
         privateKeysAliceFirst.add(getPrivateKeyResource("/alice.key"));
         privateKeysAliceFirst.add(getPrivateKeyResource("/bob.key"));
 
-        final AsicHandler asicHandler = AsicHandler.builder().withPrivateNokkeler(privateKeysAliceFirst)
+        final AsicHandler asicHandler = AsicHandler.builder().withPrivateNokler(privateKeysAliceFirst)
             .withExecutorService(executor)
             .withKeyStoreHolder(getKeystoreHolder())
             .build();
@@ -465,7 +465,7 @@ class AsicHandlerTest {
             final AsicHandler asicHandler = AsicHandler.builder()
                 .withExecutorService(executor2)
                 .withKeyStoreHolder(getKeystoreHolder())
-                .withPrivateNokkeler(emptyList())
+                .withPrivateNokler(emptyList())
                 .build();
             assertThrows(IllegalStateException.class, () -> asicHandler.decrypt(new NullInputStream(1L)));
             assertThrows(IllegalStateException.class, () -> asicHandler.writeDecrypted(new NullInputStream(1), null), AsicHandlerImpl.ERROR_MISSING_PRIVATE_KEY);
