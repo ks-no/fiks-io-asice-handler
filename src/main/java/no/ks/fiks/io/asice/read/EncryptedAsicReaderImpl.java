@@ -45,6 +45,7 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
     public ZipInputStream decrypt(final InputStream encryptedAsicData, final List<PrivateKey> privateKeys) {
         checkNotNull(encryptedAsicData);
         checkNotNull(privateKeys);
+        checkNotNull(privateKeys.get(0));
         try {
             PipedOutputStream out = new PipedOutputStream();
             PipedInputStream pipedInputStream = new PipedInputStream(out);
@@ -71,6 +72,7 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
     public void writeDecryptedToPath(InputStream encryptedAsicData, List<PrivateKey> privateKeys, Path targetPath) {
         Preconditions.checkNotNull(encryptedAsicData);
         Preconditions.checkNotNull(privateKeys);
+        Preconditions.checkNotNull(privateKeys.get(0));
         Preconditions.checkNotNull(targetPath);
         try (OutputStream fileStream = Files.newOutputStream(targetPath);
              ZipOutputStream zipOutputStream = new ZipOutputStream(fileStream)) {
@@ -117,6 +119,7 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
         checkNotNull(encryptedAsic);
         checkNotNull(zipOutputStream);
         checkNotNull(privateKeys);
+        checkNotNull(privateKeys.get(0));
         InputStream inputStream = decryptionStreamService.decrypterStream(encryptedAsic, privateKeys);
         decryptElementer(encryptedAsic, zipOutputStream, inputStream);
     }
