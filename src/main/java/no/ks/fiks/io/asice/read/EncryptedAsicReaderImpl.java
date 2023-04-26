@@ -6,7 +6,7 @@ import no.difi.asic.AsicReader;
 import no.difi.asic.AsicReaderFactory;
 import no.difi.asic.SignatureMethod;
 import no.ks.fiks.io.asice.crypto.DecryptionStreamService;
-import no.ks.kryptering.KrypteringException;
+import no.ks.fiks.io.asice.util.CMSKrypteringHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -22,7 +22,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-import no.ks.kryptering.CMSKrypteringImpl;
 
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -33,6 +32,8 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
     private final ExecutorService executorService;
     private final DecryptionStreamService decryptionStreamService;
     private final AsicReaderFactory asicReaderFactory = AsicReaderFactory.newFactory(SignatureMethod.CAdES);
+
+    private final CMSKrypteringHandler cmsKrypteringHandler = new CMSKrypteringHandler();
 
     public EncryptedAsicReaderImpl(final ExecutorService executorService, final DecryptionStreamService decryptionStreamService) {
         checkNotNull(executorService);
@@ -83,7 +84,7 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
     }
 
     private void decrypt(final InputStream encryptedAsic, final List<PrivateKey> privateKeys, final ZipOutputStream zipOutputStream) {
-        InputStream inputStream = handleEncryptedStream(encryptedAsic, privateKeys);
+        InputStream inputStream = cmsKrypteringHandler.handleEncryptedStream(encryptedAsic, privateKeys);
         decryptElementer(encryptedAsic, zipOutputStream, inputStream);
     }
 
@@ -122,36 +123,5 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
         checkNotNull(privateKeys.get(0));
         InputStream inputStream = decryptionStreamService.decrypterStream(encryptedAsic, privateKeys);
         decryptElementer(encryptedAsic, zipOutputStream, inputStream);
-    }
-
-    public InputStream handleEncryptedStream(InputStream inputStream, List<PrivateKey> privateKeys){
-        if(!inputStream.markSupported() && privateKeys.size() > 1){
-            inputStream = new BufferedInputStream(inputStream);
-        }
-        InputStream res = null;
-        int it = 0;
-        inputStream.mark(0);
-        while(res == null && it < privateKeys.size()){
-            try {
-                res = decrypterStreamForKey(inputStream, privateKeys.get(it));
-            } catch (KrypteringException krypteringException){
-                if(it == privateKeys.size()-1){
-                    throw krypteringException;
-                }
-                log.info("Kryptering feilet for privatnøkkel nr " + (it+1) + " av " + (privateKeys.size()) + ". Prøver neste nøkkel");
-                try {
-                    inputStream.reset();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                it++;
-            }
-        }
-        return res;
-    }
-
-    private InputStream decrypterStreamForKey(InputStream inputStream, PrivateKey privateKey) {
-        CMSKrypteringImpl cmsKryptering = new CMSKrypteringImpl();
-        return cmsKryptering.dekrypterData(inputStream, privateKey);
     }
 }
