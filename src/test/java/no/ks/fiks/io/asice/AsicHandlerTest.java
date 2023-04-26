@@ -258,7 +258,7 @@ class AsicHandlerTest {
     }
 
     @Test
-    @DisplayName("Test liste med en private key")
+    @DisplayName("Test liste med en private keys")
     void testDekrypterStreamListeMedEnPrivateKey() throws Exception {
         final ExecutorService executor = Executors.newFixedThreadPool(2);
         List<PrivateKey> privateKey = new ArrayList<>();
