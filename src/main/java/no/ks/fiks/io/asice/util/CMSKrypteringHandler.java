@@ -28,7 +28,7 @@ public class CMSKrypteringHandler {
                 if (it == privateKeys.size() - 1) {
                     throw krypteringException;
                 }
-                log.info("Kryptering feilet for privatnøkkel nr " + (it + 1) + " av " + (privateKeys.size()) + ". Prøver neste nøkkel");
+                log.info("Kryptering feilet for privatnøkkel nr " + (it + 1) + " av " + (privateKeys.size()) + ". Prøver neste nøkkel.");
                 try {
                     inputStream.reset();
                 } catch (IOException e) {
