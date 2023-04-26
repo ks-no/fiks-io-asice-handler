@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutorService;
  */
 public final class AsicHandlerBuilder {
     private static final String MISSING_PROPERTY_FORMAT = "\"%s\" er ikke satt";
-    private List<PrivateKey> privateNokkeler;
+    private List<PrivateKey> privateKeys;
     private ExecutorService executorService;
     private KeystoreHolder keystoreHolder;
 
@@ -29,12 +29,12 @@ public final class AsicHandlerBuilder {
         return new AsicHandlerBuilder();
     }
 
-    public AsicHandlerBuilder withPrivatNokkel(PrivateKey privatNokkel) {
-        this.privateNokkeler = Collections.singletonList(privatNokkel);
+    public AsicHandlerBuilder withPrivatNokkel(PrivateKey privateKey) {
+        this.privateKeys = Collections.singletonList(privateKey);
         return this;
     }
-    public AsicHandlerBuilder withPrivateNokkeler(List<PrivateKey> privateNokkeler) {
-        this.privateNokkeler = privateNokkeler;
+    public AsicHandlerBuilder withPrivateNokkeler(List<PrivateKey> privateKeys) {
+        this.privateKeys = privateKeys;
         return this;
     }
 
@@ -56,6 +56,6 @@ public final class AsicHandlerBuilder {
     public AsicHandler build() {
         Preconditions.checkNotNull(executorService, MISSING_PROPERTY_FORMAT, "executorService");
         Preconditions.checkNotNull(keystoreHolder, MISSING_PROPERTY_FORMAT, "keystoreHolder");
-        return new AsicHandlerImpl(privateNokkeler, new EncryptedAsicWriterImpl(new PipedEncryptionServiceImpl(executorService), executorService, new SignatureHelperProviderImpl(keystoreHolder)), new EncryptedAsicReaderImpl(executorService, new DecryptionStreamServiceImpl()));
+        return new AsicHandlerImpl(privateKeys, new EncryptedAsicWriterImpl(new PipedEncryptionServiceImpl(executorService), executorService, new SignatureHelperProviderImpl(keystoreHolder)), new EncryptedAsicReaderImpl(executorService, new DecryptionStreamServiceImpl()));
     }
 }
