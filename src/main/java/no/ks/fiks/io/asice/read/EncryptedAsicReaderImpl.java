@@ -6,7 +6,7 @@ import no.difi.asic.AsicReader;
 import no.difi.asic.AsicReaderFactory;
 import no.difi.asic.SignatureMethod;
 import no.ks.fiks.io.asice.crypto.DecryptionStreamService;
-import no.ks.kryptering.CMSKrypteringImpl;
+import no.ks.fiks.io.asice.util.CMSKrypteringHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -15,12 +15,14 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.PrivateKey;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.io.Closeables.closeQuietly;
@@ -30,6 +32,10 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
     private final ExecutorService executorService;
     private final DecryptionStreamService decryptionStreamService;
     private final AsicReaderFactory asicReaderFactory = AsicReaderFactory.newFactory(SignatureMethod.CAdES);
+    static final String ERROR_MISSING_PRIVATE_KEY = "Privatnøkkel er ikke definert. Kan ikke dekryptere";
+
+
+    private final CMSKrypteringHandler cmsKrypteringHandler = new CMSKrypteringHandler();
 
     public EncryptedAsicReaderImpl(final ExecutorService executorService, final DecryptionStreamService decryptionStreamService) {
         checkNotNull(executorService);
@@ -39,9 +45,13 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
     }
 
     @Override
-    public ZipInputStream decrypt(final InputStream encryptedAsicData, final PrivateKey privateKey) {
+    public ZipInputStream decrypt(final InputStream encryptedAsicData, final List<PrivateKey> privateKeys) {
         checkNotNull(encryptedAsicData);
-        checkNotNull(privateKey);
+        checkNotNull(privateKeys);
+        privateKeys.forEach(Preconditions::checkNotNull);
+        if(privateKeys.isEmpty()){
+            throw new IllegalStateException(ERROR_MISSING_PRIVATE_KEY);
+        }
         try {
             PipedOutputStream out = new PipedOutputStream();
             PipedInputStream pipedInputStream = new PipedInputStream(out);
@@ -49,7 +59,7 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
             executorService.execute(() -> {
                 Optional.ofNullable(mdc).ifPresent(MDC::setContextMap);
                 try (ZipOutputStream zipOutputStream = new ZipOutputStream(new BufferedOutputStream(out))) {
-                    decrypt(encryptedAsicData, zipOutputStream, privateKey);
+                    decrypt(encryptedAsicData, zipOutputStream, privateKeys);
                 } catch (IOException e) {
                     log.error("Failed to decrypt stream", e);
                     throw new RuntimeException(e);
@@ -65,24 +75,26 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
     }
 
     @Override
-    public void writeDecryptedToPath(InputStream encryptedAsicData, PrivateKey privateKey, Path targetPath) {
+    public void writeDecryptedToPath(InputStream encryptedAsicData, List<PrivateKey> privateKeys, Path targetPath) {
         Preconditions.checkNotNull(encryptedAsicData);
-        Preconditions.checkNotNull(privateKey);
+        Preconditions.checkNotNull(privateKeys);
+        if(privateKeys.isEmpty()){
+            throw new IllegalStateException(ERROR_MISSING_PRIVATE_KEY);
+        }
         Preconditions.checkNotNull(targetPath);
         try (OutputStream fileStream = Files.newOutputStream(targetPath);
              ZipOutputStream zipOutputStream = new ZipOutputStream(fileStream)) {
-            decrypt(encryptedAsicData, privateKey, zipOutputStream);
+            decrypt(encryptedAsicData, privateKeys, zipOutputStream);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void decrypt(final InputStream encryptedAsic, final PrivateKey privateKey, final ZipOutputStream zipOutputStream) {
-        CMSKrypteringImpl cmsKryptering = new CMSKrypteringImpl();
-
-        InputStream inputStream = cmsKryptering.dekrypterData(encryptedAsic, privateKey);
+    private void decrypt(final InputStream encryptedAsic, final List<PrivateKey> privateKeys, final ZipOutputStream zipOutputStream) {
+        InputStream inputStream = cmsKrypteringHandler.handleEncryptedStream(encryptedAsic, privateKeys);
         decryptElementer(encryptedAsic, zipOutputStream, inputStream);
     }
+
 
     private void decryptElementer(InputStream encryptedAsic, ZipOutputStream zipOutputStream, InputStream inputStream) {
         AsicReader reader;
@@ -110,12 +122,12 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
 
     private void decrypt(@NonNull final InputStream encryptedAsic,
                          @NonNull final ZipOutputStream zipOutputStream,
-                         @NonNull final PrivateKey privatNokkel) {
+                         @NonNull final List<PrivateKey> privateKeys) {
 
         checkNotNull(encryptedAsic);
         checkNotNull(zipOutputStream);
-        checkNotNull(privatNokkel);
-        InputStream inputStream = decryptionStreamService.decrypterStream(encryptedAsic, privatNokkel);
+        checkNotNull(privateKeys.get(0));
+        InputStream inputStream = decryptionStreamService.decrypterStream(encryptedAsic, privateKeys);
         decryptElementer(encryptedAsic, zipOutputStream, inputStream);
     }
 }

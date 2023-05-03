@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -219,6 +220,184 @@ class AsicHandlerTest {
     }
 
     @Test
+    @DisplayName("Test at en eller flere ugyldige private keys kaster kryptering-feil og returnerer null")
+    void testDekrypterStreamFeilPrivateKey() throws Exception {
+
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        final AsicHandler asicHandler = AsicHandler.builder()
+            .withPrivatNokkel(getPrivateKeyResource("/alice.key"))
+            .withKeyStoreHolder(getKeystoreHolder())
+            .withExecutorService(executor)
+            .build();
+
+        List<PrivateKey> privateKeys = new ArrayList<>();
+        privateKeys.add(getPrivateKeyResource("/alice.key"));
+        privateKeys.add(getPrivateKeyResource("/alice.key"));
+        privateKeys.add(getPrivateKeyResource("/alice.key"));
+        privateKeys.add(getPrivateKeyResource("/alice.key"));
+
+        final AsicHandler asicHandlerList = AsicHandler.builder()
+            .withPrivateNokler(privateKeys)
+            .withKeyStoreHolder(getKeystoreHolder())
+            .withExecutorService(executor)
+            .build();
+
+        byte[] payload = UUID.randomUUID().toString().getBytes(StandardCharsets.UTF_8);
+        InputStream encrypted = asicHandler.encrypt(getPublicCertResource("bob.cert"), singletonList(new StreamContent(new ByteArrayInputStream(payload), "payload.txt")));
+        InputStream encryptedWithList = asicHandlerList.encrypt(getPublicCertResource("bob.cert"), singletonList(new StreamContent(new ByteArrayInputStream(payload), "payload.txt")));
+        ZipInputStream decrypt = asicHandler.decrypt(new ByteArrayInputStream(IOUtils.toByteArray(encrypted)));
+        ZipInputStream decryptWithList = asicHandlerList.decrypt(new ByteArrayInputStream(IOUtils.toByteArray(encryptedWithList)));
+
+        assertArrayEquals(null, readBytes(decrypt).get("payload.txt"));
+        assertArrayEquals(null, readBytes(decryptWithList).get("payload.txt"));
+        decrypt.close();
+        decryptWithList.close();
+        encrypted.close();
+        executor.shutdownNow();
+    }
+
+    @Test
+    @DisplayName("Test liste med en private keys")
+    void testDekrypterStreamListeMedEnPrivateKey() throws Exception {
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
+        List<PrivateKey> privateKey = new ArrayList<>();
+        privateKey.add(getPrivateKeyResource("/bob.key"));
+
+        final AsicHandler asicHandler = AsicHandler.builder()
+            .withPrivateNokler(privateKey)
+            .withKeyStoreHolder(getKeystoreHolder())
+            .withExecutorService(executor)
+            .build();
+
+        byte[] payload = UUID.randomUUID().toString().getBytes(StandardCharsets.UTF_8);
+        InputStream encrypted = asicHandler.encrypt(getPublicCertResource("bob.cert"), singletonList(new StreamContent(new ByteArrayInputStream(payload), "payload.txt")));
+
+
+        ZipInputStream decrypt = asicHandler.decrypt(new ByteArrayInputStream(IOUtils.toByteArray(encrypted)));
+        assertArrayEquals(payload, readBytes(decrypt).get("payload.txt"));
+
+        executor.shutdownNow();
+    }
+    @Test
+    @DisplayName("Test liste med to private key bob først")
+    void testDekrypterStreamListeMedToPrivateKeyBobFirst() throws Exception {
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
+        List<PrivateKey> privateKey = new ArrayList<>();
+        privateKey.add(getPrivateKeyResource("/bob.key"));
+        privateKey.add(getPrivateKeyResource("/alice.key"));
+
+        final AsicHandler asicHandler = AsicHandler.builder()
+            .withPrivateNokler(privateKey)
+            .withKeyStoreHolder(getKeystoreHolder())
+            .withExecutorService(executor)
+            .build();
+
+        byte[] payload = UUID.randomUUID().toString().getBytes(StandardCharsets.UTF_8);
+        InputStream encrypted = asicHandler.encrypt(getPublicCertResource("bob.cert"), singletonList(new StreamContent(new ByteArrayInputStream(payload), "payload.txt")));
+
+
+        ZipInputStream decrypt = asicHandler.decrypt(new ByteArrayInputStream(IOUtils.toByteArray(encrypted)));
+        assertArrayEquals(payload, readBytes(decrypt).get("payload.txt"));
+
+        executor.shutdownNow();
+    }
+    @Test
+    @DisplayName("Test liste med to private key alice først")
+    void testDekrypterStreamListeMedToPrivateKeyAliceFirst() throws Exception {
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
+        List<PrivateKey> privateKey = new ArrayList<>();
+        privateKey.add(getPrivateKeyResource("/alice.key"));
+        privateKey.add(getPrivateKeyResource("/bob.key"));
+
+        final AsicHandler asicHandler = AsicHandler.builder()
+            .withPrivateNokler(privateKey)
+            .withKeyStoreHolder(getKeystoreHolder())
+            .withExecutorService(executor)
+            .build();
+
+        byte[] payload = UUID.randomUUID().toString().getBytes(StandardCharsets.UTF_8);
+        InputStream encrypted = asicHandler.encrypt(getPublicCertResource("bob.cert"), singletonList(new StreamContent(new ByteArrayInputStream(payload), "payload.txt")));
+
+
+        ZipInputStream decrypt = asicHandler.decrypt(new ByteArrayInputStream(IOUtils.toByteArray(encrypted)));
+        assertArrayEquals(payload, readBytes(decrypt).get("payload.txt"));
+
+        executor.shutdownNow();
+    }
+
+    @Test
+    @DisplayName("Test at en eller flere feil og en riktig private key blir riktig")
+    void testDekrypterStreamFlerePrivateKey() throws Exception {
+
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        List<PrivateKey> privateKeysAliceFirst = new ArrayList<>();
+        List<PrivateKey> privateKeysBobFirst = new ArrayList<>();
+        List<PrivateKey> privateKeysBobIMidtenAvMangeAlice = new ArrayList<>();
+        privateKeysAliceFirst.add(getPrivateKeyResource("/alice.key"));
+        privateKeysAliceFirst.add(getPrivateKeyResource("/bob.key"));
+
+        privateKeysBobFirst.add(getPrivateKeyResource("/bob.key"));
+        privateKeysBobFirst.add(getPrivateKeyResource("/alice.key"));
+
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/bob.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+        privateKeysBobIMidtenAvMangeAlice.add(getPrivateKeyResource("/alice.key"));
+
+        final AsicHandler asicHandlerAliceFirst = AsicHandler.builder()
+            .withPrivateNokler(privateKeysAliceFirst)
+            .withKeyStoreHolder(getKeystoreHolder())
+            .withExecutorService(executor)
+            .build();
+
+        final AsicHandler asicHandlerBobFirst = AsicHandler.builder()
+            .withPrivateNokler(privateKeysBobFirst)
+            .withKeyStoreHolder(getKeystoreHolder())
+            .withExecutorService(executor)
+            .build();
+
+        final AsicHandler asicHandlerBobInMiddleOfAlices = AsicHandler.builder()
+            .withPrivateNokler(privateKeysBobIMidtenAvMangeAlice)
+            .withKeyStoreHolder(getKeystoreHolder())
+            .withExecutorService(executor)
+            .build();
+
+        byte[] payload = UUID.randomUUID().toString().getBytes(StandardCharsets.UTF_8);
+        InputStream encrypted = asicHandlerAliceFirst.encrypt(getPublicCertResource("bob.cert"), singletonList(new StreamContent(new ByteArrayInputStream(payload), "payload.txt")));
+        InputStream encrypted2 = asicHandlerBobFirst.encrypt(getPublicCertResource("bob.cert"), singletonList(new StreamContent(new ByteArrayInputStream(payload), "payload.txt")));
+        InputStream encrypted3 = asicHandlerBobInMiddleOfAlices.encrypt(getPublicCertResource("bob.cert"), singletonList(new StreamContent(new ByteArrayInputStream(payload), "payload.txt")));
+
+        ZipInputStream decryptAliceFirst = asicHandlerAliceFirst.decrypt(new ByteArrayInputStream(IOUtils.toByteArray(encrypted)));
+        ZipInputStream decryptBobFirst = asicHandlerBobFirst.decrypt(new ByteArrayInputStream(IOUtils.toByteArray(encrypted2)));
+        ZipInputStream decryptBobInMiddleOfAlices = asicHandlerBobInMiddleOfAlices.decrypt(new ByteArrayInputStream(IOUtils.toByteArray(encrypted3)));
+
+        assertArrayEquals(payload, readBytes(decryptAliceFirst).get("payload.txt"));
+        assertArrayEquals(payload, readBytes(decryptBobFirst).get("payload.txt"));
+        assertArrayEquals(payload, readBytes(decryptBobInMiddleOfAlices).get("payload.txt"));
+        decryptAliceFirst.close();
+        decryptBobFirst.close();
+        decryptBobInMiddleOfAlices.close();
+        encrypted.close();
+        executor.shutdownNow();
+    }
+
+    @Test
     @DisplayName("Test at vi kan dekryptere en payload til en fil")
     void testDekrypterFil(@TempDir Path tempDir) throws Exception {
 
@@ -240,14 +419,53 @@ class AsicHandlerTest {
         executor.shutdownNow();
     }
 
+    @Test
+    @DisplayName("Test at vi kan dekryptere en payload til en fil, flere nøkler")
+    void testDekrypterFilFlereNoekler(@TempDir Path tempDir) throws Exception {
+
+        final ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        List<PrivateKey> privateKeysAliceFirst = new ArrayList<>();
+
+        privateKeysAliceFirst.add(getPrivateKeyResource("/alice.key"));
+        privateKeysAliceFirst.add(getPrivateKeyResource("/bob.key"));
+
+        final AsicHandler asicHandler = AsicHandler.builder().withPrivateNokler(privateKeysAliceFirst)
+            .withExecutorService(executor)
+            .withKeyStoreHolder(getKeystoreHolder())
+            .build();
+
+        byte[] payload = UUID.randomUUID().toString().getBytes(StandardCharsets.UTF_8);
+        InputStream encrypted = asicHandler.encrypt(getPublicCertResource("bob.cert"), singletonList(new StreamContent(new ByteArrayInputStream(payload), "payload.txt")));
+
+        Path path = tempDir.resolve(UUID.randomUUID().toString());
+
+        asicHandler.writeDecrypted(encrypted, path);
+        assertTrue(Files.exists(path));
+        assertArrayEquals(payload, readBytes(new ZipInputStream(Files.newInputStream(path))).get("payload.txt"));
+        executor.shutdownNow();
+    }
+
     @DisplayName("Kan ikke dekryptere uten at privat nøkkel er oppgitt")
     @Test
     void testDekrypterPrivatNokkelMangler() throws CertificateException, NoSuchAlgorithmException, KeyStoreException, IOException {
         final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final ExecutorService executor2 = Executors.newSingleThreadExecutor();
         try {
             final AsicHandler asicHandler = AsicHandler.builder()
                 .withExecutorService(executor)
                 .withKeyStoreHolder(getKeystoreHolder())
+                .build();
+            assertThrows(IllegalStateException.class, () -> asicHandler.decrypt(new NullInputStream(1L)));
+            assertThrows(IllegalStateException.class, () -> asicHandler.writeDecrypted(new NullInputStream(1), null), AsicHandlerImpl.ERROR_MISSING_PRIVATE_KEY);
+        } finally {
+            executor.shutdownNow();
+        }
+        try {
+            final AsicHandler asicHandler = AsicHandler.builder()
+                .withExecutorService(executor2)
+                .withKeyStoreHolder(getKeystoreHolder())
+                .withPrivateNokler(emptyList())
                 .build();
             assertThrows(IllegalStateException.class, () -> asicHandler.decrypt(new NullInputStream(1L)));
             assertThrows(IllegalStateException.class, () -> asicHandler.writeDecrypted(new NullInputStream(1), null), AsicHandlerImpl.ERROR_MISSING_PRIVATE_KEY);
