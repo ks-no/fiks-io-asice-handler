@@ -48,7 +48,10 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
     public ZipInputStream decrypt(final InputStream encryptedAsicData, final List<PrivateKey> privateKeys) {
         checkNotNull(encryptedAsicData);
         checkNotNull(privateKeys);
-        checkNotNull(privateKeys.get(0));
+        privateKeys.forEach(Preconditions::checkNotNull);
+        if(privateKeys.isEmpty()){
+            throw new IllegalStateException(ERROR_MISSING_PRIVATE_KEY);
+        }
         try {
             PipedOutputStream out = new PipedOutputStream();
             PipedInputStream pipedInputStream = new PipedInputStream(out);
