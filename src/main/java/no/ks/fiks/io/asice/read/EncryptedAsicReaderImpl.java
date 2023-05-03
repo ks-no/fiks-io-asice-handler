@@ -32,6 +32,8 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
     private final ExecutorService executorService;
     private final DecryptionStreamService decryptionStreamService;
     private final AsicReaderFactory asicReaderFactory = AsicReaderFactory.newFactory(SignatureMethod.CAdES);
+    static final String ERROR_MISSING_PRIVATE_KEY = "Privatnøkkel er ikke definert. Kan ikke dekryptere";
+
 
     private final CMSKrypteringHandler cmsKrypteringHandler = new CMSKrypteringHandler();
 
@@ -73,7 +75,9 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
     public void writeDecryptedToPath(InputStream encryptedAsicData, List<PrivateKey> privateKeys, Path targetPath) {
         Preconditions.checkNotNull(encryptedAsicData);
         Preconditions.checkNotNull(privateKeys);
-        Preconditions.checkNotNull(privateKeys.get(0));
+        if(privateKeys.isEmpty()){
+            throw new IllegalStateException(ERROR_MISSING_PRIVATE_KEY);
+        }
         Preconditions.checkNotNull(targetPath);
         try (OutputStream fileStream = Files.newOutputStream(targetPath);
              ZipOutputStream zipOutputStream = new ZipOutputStream(fileStream)) {
@@ -119,7 +123,6 @@ public class EncryptedAsicReaderImpl implements EncryptedAsicReader {
 
         checkNotNull(encryptedAsic);
         checkNotNull(zipOutputStream);
-        checkNotNull(privateKeys);
         checkNotNull(privateKeys.get(0));
         InputStream inputStream = decryptionStreamService.decrypterStream(encryptedAsic, privateKeys);
         decryptElementer(encryptedAsic, zipOutputStream, inputStream);

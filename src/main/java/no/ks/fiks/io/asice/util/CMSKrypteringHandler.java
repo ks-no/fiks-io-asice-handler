@@ -18,12 +18,12 @@ public class CMSKrypteringHandler {
         if (!inputStream.markSupported() && privateKeys.size() > 1) {
             inputStream = new BufferedInputStream(inputStream);
         }
-        InputStream res = null;
+        InputStream dekryptertStream = null;
         int it = 0;
         inputStream.mark(0);
-        while (res == null && it < privateKeys.size()) {
+        while (dekryptertStream == null && it < privateKeys.size()) {
             try {
-                res = decrypterStreamForKey(inputStream, privateKeys.get(it));
+                dekryptertStream = decrypterStreamForKey(inputStream, privateKeys.get(it));
             } catch (KrypteringException krypteringException) {
                 if (it == privateKeys.size() - 1) {
                     throw krypteringException;
@@ -37,7 +37,7 @@ public class CMSKrypteringHandler {
                 it++;
             }
         }
-        return res;
+        return dekryptertStream;
     }
 
     private InputStream decrypterStreamForKey(InputStream inputStream, PrivateKey privateKey) {
