@@ -29,12 +29,12 @@ public class CMSKrypteringHandler {
                     throw krypteringException;
                 }
                 log.info("Kryptering feilet for privatnøkkel nr " + (it + 1) + " av " + (privateKeys.size()) + ". Prøver neste nøkkel.");
+                it++;
                 try {
                     inputStream.reset();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                it++;
             }
         }
         return dekryptertStream;
