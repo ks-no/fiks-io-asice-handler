@@ -27,7 +27,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <difi-commons-asic.version>1.0.0</difi-commons-asic.version>
+        <difi-commons-asic.version>1.0.1</difi-commons-asic.version>
         <bouncycastle.version>1.76</bouncycastle.version>
         <lombok.version>1.18.28</lombok.version>
         <jaxb-runtime.version>4.0.3</jaxb-runtime.version>
