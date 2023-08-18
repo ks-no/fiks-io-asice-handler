@@ -31,7 +31,7 @@
         <bouncycastle.version>1.76</bouncycastle.version>
         <lombok.version>1.18.28</lombok.version>
         <jaxb-runtime.version>4.0.3</jaxb-runtime.version>
-        <kryptering.version>2.0.1</kryptering.version>
+        <kryptering.version>2.0.2</kryptering.version>
         <logback.version>1.4.8</logback.version>
         <slf4j.version>2.0.7</slf4j.version>
         <guava.version>32.1.1-jre</guava.version>
