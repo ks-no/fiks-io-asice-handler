@@ -33,7 +33,7 @@
         <jaxb-runtime.version>4.0.3</jaxb-runtime.version>
         <kryptering.version>2.0.2</kryptering.version>
         <logback.version>1.4.11</logback.version>
-        <slf4j.version>2.0.7</slf4j.version>
+        <slf4j.version>2.0.9</slf4j.version>
         <guava.version>32.1.2-jre</guava.version>
 
         <junit.version>5.10.0</junit.version>
