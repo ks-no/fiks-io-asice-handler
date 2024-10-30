@@ -28,7 +28,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <difi-commons-asic.version>1.0.2</difi-commons-asic.version>
-        <bouncycastle.version>1.78.1</bouncycastle.version>
+        <bouncycastle.version>1.79</bouncycastle.version>
         <lombok.version>1.18.34</lombok.version>
         <jaxb-runtime.version>4.0.5</jaxb-runtime.version>
         <kryptering.version>2.0.5</kryptering.version>
