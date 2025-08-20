@@ -37,7 +37,7 @@
         <guava.version>33.4.8-jre</guava.version>
 
         <junit.version>5.13.4</junit.version>
-        <assertj.version>3.26.3</assertj.version>
+        <assertj.version>3.27.4</assertj.version>
         <mockito.version>5.14.2</mockito.version>
     </properties>
 
