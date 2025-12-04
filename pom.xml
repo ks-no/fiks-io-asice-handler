@@ -29,7 +29,7 @@
 
         <difi-commons-asic.version>1.0.2</difi-commons-asic.version>
         <lombok.version>1.18.42</lombok.version>
-        <bouncycastle.version>1.82</bouncycastle.version>
+        <bouncycastle.version>1.83</bouncycastle.version>
         <jaxb-runtime.version>4.0.5</jaxb-runtime.version>
         <kryptering.version>2.1.0</kryptering.version>
         <logback.version>1.5.21</logback.version>
@@ -63,9 +63,20 @@
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
                 <artifactId>bcpkix-jdk18on</artifactId>
                 <version>${bouncycastle.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcutil-jdk18on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
