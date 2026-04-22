@@ -1,23 +1,94 @@
-# fiks-io-asic-handler
+# fiks-io-asice-handler
 ![GitHub](https://img.shields.io/github/license/ks-no/fiks-io-asice-handler)
 [![Maven Central](https://img.shields.io/maven-central/v/no.ks.fiks/fiks-io-asice-handler.svg)](https://search.maven.org/search?q=g:no.ks.fiks%20a:fiks-io-asice-handler)
 ![GitHub last commit](https://img.shields.io/github/last-commit/ks-no/fiks-io-asice-handler.svg)
 ![GitHub Release Date](https://img.shields.io/github/release-date/ks-no/fiks-io-asice-handler.svg)
 
-Wrapper for DIFI's AsicE library
-## Example
+Java library for creating, encrypting, and decrypting [ASiC-E](https://www.etsi.org/deliver/etsi_ts/102900_102999/102918/01.03.01_60/ts_102918v010301p.pdf) (Associated Signature Containers, Extended) packages, as used by [FIKS IO](https://developers.fiks.ks.no/tjenester/fiksio/). Wraps the [commons-asic](https://github.com/ks-no/fiks-commons-asic) library with a streaming-friendly API supporting concurrent operations.
+
+## Requirements
+
+- Java 17 or later
+
+## Installation
+
+**Maven:**
+```xml
+<dependency>
+    <groupId>no.ks.fiks</groupId>
+    <artifactId>fiks-io-asice-handler</artifactId>
+    <version><!-- see Maven Central badge above --></version>
+</dependency>
+```
+
+**Gradle:**
+```groovy
+implementation 'no.ks.fiks:fiks-io-asice-handler:<version>'
+```
+
+## Usage
+
+### Setup
+
 ```java
-final ExecutorService executor = // create Executor service to be used internally (minimum 2 threads)
-final PrivateKey privateKey = // a java.security.PrivateKey instance to be used for decryption 
-final KeyStoreHolder keyStoreHolder = KeyStoreHolder.builder()
-    .withKeyStore(keyStore) // a java.security.KeyStore to be used to get encryption certificate from
-    .withKeyStorePassword("keystorepassword")
+ExecutorService executor = Executors.newFixedThreadPool(4); // minimum 2 threads
+PrivateKey privateKey = // java.security.PrivateKey used for decryption
+
+KeystoreHolder keyStoreHolder = KeystoreHolder.builder()
+    .withKeyStore(keyStore)           // java.security.KeyStore with encryption certificate
+    .withKeyStorePassword("password")
     .withKeyAlias("keyAlias")
     .withKeyPassword("keyPassword")
     .build();
-final AsicHandler asicHandler = AsicHandler.builder()
+
+AsicHandler asicHandler = AsicHandler.builder()
     .withPrivatNokkel(privateKey)
     .withExecutorService(executor)
     .withKeyStoreHolder(keyStoreHolder)
     .build();
 ```
+
+### Encrypt
+
+```java
+X509Certificate recipientCert = // certificate of the recipient
+List<Content> payload = List.of(
+    new Content(new FileInputStream("document.pdf"), "document.pdf")
+);
+
+InputStream encryptedStream = asicHandler.encrypt(recipientCert, payload);
+```
+
+### Decrypt to ZipInputStream
+
+```java
+InputStream encryptedAsicData = // encrypted ASiC-E package
+
+try (ZipInputStream zip = asicHandler.decrypt(encryptedAsicData)) {
+    ZipEntry entry;
+    while ((entry = zip.getNextEntry()) != null) {
+        // process entry.getName() / zip stream
+    }
+}
+```
+
+### Decrypt to file
+
+```java
+InputStream encryptedAsicData = // encrypted ASiC-E package
+Path targetPath = Path.of("/output/dir");
+
+asicHandler.writeDecrypted(encryptedAsicData, targetPath);
+```
+
+## Building
+
+```bash
+mvn clean install
+```
+
+## Dependencies and maintenance
+
+Dependency updates are managed by Dependabot (daily, Maven ecosystem).
+
+
