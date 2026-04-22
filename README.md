@@ -4,7 +4,7 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/ks-no/fiks-io-asice-handler.svg)
 ![GitHub Release Date](https://img.shields.io/github/release-date/ks-no/fiks-io-asice-handler.svg)
 
-Java library for creating, encrypting, and decrypting [ASiC-E](https://www.etsi.org/deliver/etsi_ts/102900_102999/102918/01.03.01_60/ts_102918v010301p.pdf) (Associated Signature Containers, Extended) packages, as used by [FIKS IO](https://developers.fiks.ks.no/tjenester/fiksio/). Wraps the [commons-asic](https://github.com/ks-no/fiks-commons-asic) library with a streaming-friendly API supporting concurrent operations.
+Java library for creating, encrypting, and decrypting [ASiC-E](https://www.etsi.org/deliver/etsi_ts/102900_102999/102918/01.03.01_60/ts_102918v010301p.pdf) (Associated Signature Containers, Extended) packages, as used by [FIKS IO](https://developers.fiks.ks.no/tjenester/fiksprotokoll/fiksio/). Wraps the [commons-asic](https://github.com/ks-no/asic) library with a streaming-friendly API supporting concurrent operations.
 
 ## Requirements
 
@@ -31,7 +31,7 @@ implementation 'no.ks.fiks:fiks-io-asice-handler:<version>'
 ### Setup
 
 ```java
-ExecutorService executor = Executors.newFixedThreadPool(4); // minimum 2 threads
+ExecutorService executor = Executors.newFixedThreadPool(2); // minimum 2 threads
 PrivateKey privateKey = // java.security.PrivateKey used for decryption
 
 KeystoreHolder keyStoreHolder = KeystoreHolder.builder()
@@ -53,7 +53,7 @@ AsicHandler asicHandler = AsicHandler.builder()
 ```java
 X509Certificate recipientCert = // certificate of the recipient
 List<Content> payload = List.of(
-    new Content(new FileInputStream("document.pdf"), "document.pdf")
+    new StreamContent(new FileInputStream("document.pdf"), "document.pdf")
 );
 
 InputStream encryptedStream = asicHandler.encrypt(recipientCert, payload);
