@@ -30,13 +30,16 @@ implementation 'no.ks.fiks:fiks-io-asice-handler:<version>'
 
 ### Setup
 
+`AsicHandler` implements `AutoCloseable` and should be closed when no longer needed.
+
 ```java
 ExecutorService executor = Executors.newFixedThreadPool(2); // minimum 2 threads
 PrivateKey privateKey = // java.security.PrivateKey used for decryption
+KeyStore keyStore = // java.security.KeyStore containing the signing certificate
 
 KeystoreHolder keyStoreHolder = KeystoreHolder.builder()
-    .withKeyStore(keyStore)           // java.security.KeyStore with encryption certificate
-    .withKeyStorePassword("password")
+    .withKeyStore(keyStore)
+    .withKeyStorePassword("keystorePassword")
     .withKeyAlias("keyAlias")
     .withKeyPassword("keyPassword")
     .build();
