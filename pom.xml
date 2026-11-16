@@ -29,7 +29,7 @@
 
         <difi-commons-asic.version>1.2.0</difi-commons-asic.version>
         <lombok.version>1.18.48</lombok.version>
-        <bouncycastle.version>1.86</bouncycastle.version>
+        <bouncycastle.version>1.87</bouncycastle.version>
         <jaxb-runtime.version>4.0.5</jaxb-runtime.version>
         <kryptering.version>2.5.0</kryptering.version>
         <logback.version>1.6.6</logback.version>
